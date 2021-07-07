@@ -13,7 +13,8 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-        openDatabaseConnection()
+        let db = openDatabaseConnection()
+        createTable(db: db)
         
     }
     
@@ -27,6 +28,30 @@ class ViewController: UIViewController {
             print("unable to open database")
             return nil
         }
+    }
+    
+    func createTable(db: OpaquePointer?){
+        let createTableString = """
+        CREATE TABLE Contact(Id INT PRIMARY KEY NOT NULL,
+        Name CHAR(255));
+        """
+        
+        //1
+        var createTableStatement: OpaquePointer?
+        
+        //2
+        if sqlite3_prepare_v2(db, createTableString, -1, &createTableStatement, nil) == SQLITE_OK{
+            //3
+            if sqlite3_step(createTableStatement) == SQLITE_DONE {
+                print("Contact table created")
+            }else {
+                print("Contact table is not created")
+            }
+        }else {
+            print("create table statement is not prepared")
+        }
+        //4
+        sqlite3_finalize(createTableStatement)
     }
 
 }
