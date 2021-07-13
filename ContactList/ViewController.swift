@@ -23,33 +23,7 @@ class ViewController: UITableViewController {
 //        query(db: db)
         
     }
-    
-    
-    @objc func showAlertController(){
-        let alertController = UIAlertController(title: "Add contact", message: nil, preferredStyle: .alert)
-        alertController.addTextField{ (tf) in
-            tf.placeholder  = "Enter Id"
-            tf.keyboardType = .asciiCapableNumberPad
-        }
-        alertController.addTextField { (tf) in
-            tf.placeholder = "Enter Name"
-        }
-        let submitButton = UIAlertAction(title: "Submit", style: .default) { [weak self, weak alertController] (action) in
-            guard let id = alertController?.textFields?[0].text else {return}
-            guard let name = alertController?.textFields?[1].text else {return}
-            print("\(id)  ||  \(name)")
-            
-            guard let idAsInt = Int32(id) else {return}
-            
-            self?.insert(id: idAsInt, name: name as NSString, db: self?.db)
-            self?.query(db: self?.db)
-        }
-        alertController.addAction(submitButton)
-        present(alertController, animated: true)
         
-    }
-    
-    
     // connect to database
     func openDatabaseConnection() -> OpaquePointer?{
         var db: OpaquePointer?
@@ -103,7 +77,7 @@ class ViewController: UITableViewController {
             if sqlite3_step(insertStatement) == SQLITE_DONE{
                 print("row inserted successfully")
             }else{
-                print("failed to insert data")
+                showErrorAlert(msg: "User with this data already exsists")
             }
         }else{
             print("insert statement not prepared")
@@ -160,6 +134,37 @@ class ViewController: UITableViewController {
         }
         sqlite3_finalize(deleteOpauePointer)
     }
+    
+    @objc func showAlertController(){
+        let alertController = UIAlertController(title: "Add contact", message: nil, preferredStyle: .alert)
+        alertController.addTextField{ (tf) in
+            tf.placeholder  = "Enter Id"
+            tf.keyboardType = .asciiCapableNumberPad
+        }
+        alertController.addTextField { (tf) in
+            tf.placeholder = "Enter Name"
+        }
+        let submitButton = UIAlertAction(title: "Submit", style: .default) { [weak self, weak alertController] (action) in
+            guard let id = alertController?.textFields?[0].text else {return}
+            guard let name = alertController?.textFields?[1].text else {return}
+            print("\(id)  ||  \(name)")
+            
+            guard let idAsInt = Int32(id) else {return}
+            
+            self?.insert(id: idAsInt, name: name as NSString, db: self?.db)
+            self?.query(db: self?.db)
+        }
+        alertController.addAction(submitButton)
+        present(alertController, animated: true)
+        
+    }
+    
+    func showErrorAlert(msg: String){
+        let ac = UIAlertController(title: "Error", message: msg, preferredStyle: .alert)
+        ac.addAction(UIAlertAction(title: "Ok", style: .default))
+        self.present(ac, animated: true)
+    }
+    
 }
 
 extension ViewController {
